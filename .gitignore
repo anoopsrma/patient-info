@@ -9,3 +9,8 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
+npm-debug.log
+bootstrap/compiled.php
+.env.*.php
+.env.php
+.rocketeer/
