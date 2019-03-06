@@ -1,13 +1,13 @@
 @extends('layouts.auth')
 
 @section('auth')
-<div class="col-md-8">
+<div class="col-md-5">
     <div class="card-group">
         <div class="card">
             <div class="card-body p-5">
-                <div class="text-center d-lg-none">
+                {{-- <div class="text-center d-lg-none">
                     <img src="svg/modulr.svg" class="mb-5" width="150" alt="Modulr Logo">
-                </div>
+                </div> --}}
                 <h1>{{ __('Login') }}</h1>
                 <p class="text-muted">Sign In to your account</p>
 
@@ -68,7 +68,7 @@
                 </div>
             </div>
         </div>
-        <div class="card text-white bg-primary py-5 d-md-down-none">
+        {{-- <div class="card text-white bg-primary py-5 d-md-down-none">
             <div class="card-body text-center">
                 <div>
                     <img src="svg/modulr.svg" class="mb-5" width="150" alt="Modulr Logo">
@@ -77,7 +77,7 @@
                     <a class="btn btn-primary active mt-2" href="{{ route('register') }}">{{ __('Register Now!') }}</a>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
 </div>
 @endsection
