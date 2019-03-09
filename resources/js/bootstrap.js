@@ -13,6 +13,7 @@ try {
 
     require('bootstrap');
     require('@coreui/coreui');
+    require( 'datatables.net-bs4' )();
 } catch (e) {}
 
 /**

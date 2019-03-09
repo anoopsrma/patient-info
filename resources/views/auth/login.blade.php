@@ -8,9 +8,10 @@
                 {{-- <div class="text-center d-lg-none">
                     <img src="svg/modulr.svg" class="mb-5" width="150" alt="Modulr Logo">
                 </div> --}}
-                <h1>{{ __('Login') }}</h1>
-                <p class="text-muted">Sign In to your account</p>
-
+                <h3 class="text-primary">सामाजिक सेवा एकाइँ</h3>
+                <h3 class="text-primary">{{ __('Login') }}</h3>
+                {{-- <p class="text-muted">Sign In to your account</p> --}}
+                <br>
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
                     <div class="input-group mb-3">
@@ -39,6 +40,7 @@
                         </span>
                         @endif
                     </div>
+                    <br>
                     <div class="input-group mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
