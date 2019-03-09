@@ -22,22 +22,34 @@
                 <div class="row">
                     <div class="form-group col-sm-3">
                         <label for="from"><strong>From</strong></label>
-                        <input class="form-control" name="from" type="date" value="{{Carbon\Carbon::now()->startOfMonth()->toDateString()}}">
+                        <input class="form-control" id="from" type="date" value="{{Carbon\Carbon::now()->startOfMonth()->toDateString()}}">
                     </div>
                     <div class="form-group col-sm-3">
                         <label for="to">To</label>
-                        <input class="form-control" name="to" type="date">
+                        <input class="form-control" id="to" type="date">
                     </div>
                     <div class="form-group col-sm-3">
-                        <label for="last_name"><strong>Medicine</strong></label>
-                        <input class="form-control" id="last_name" type="text">
+                        <label for="name"><strong>Medicine</strong></label>
+                        <input class="form-control" id="name" type="text">
                     </div>
                     <div class="form-group col-sm-2">
-                        <button class="btn btn-sm btn-danger" style="margin-top: 35px;">
+                        <button class="btn btn-sm btn-danger" id="search-form" style="margin-top: 35px;">
                         </i>Search</button>
-                        <button class="btn btn-sm btn-primary" style="margin-top: 35px;"></i>CSV</button>
+                        <button class="btn btn-sm btn-primary" id= "stockCsv" style="margin-top: 35px;"></i>CSV</button>
                     </div>
                 </div>
+                {{ Form::open([
+    'url'   => route("stock.csv"),
+    'method' => 'post',
+    'id'    => 'download-csv',
+    'target' => '_blank',
+    ])
+}}
+    {{ Form::hidden('from', null, ['id' => 'download-from']) }}
+    {{ Form::hidden('to', null, ['id' => 'download-to']) }}
+    {{ Form::hidden('username', null, ['id' => 'download-username']) }}
+
+{{ Form::close() }}
                 <table class="table table-responsive-sm table-striped" id="stocks-table">
                     <thead>
                         <tr>
@@ -62,7 +74,7 @@
 @section('script')
 <script>
     $(function() {
-        $('.table').DataTable({
+        var stocktable = $('.table').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
@@ -84,6 +96,17 @@
                 {data:'created_at', name:'created_at', width:'15%'}
             ]
         })
+        $('#search-form').on('click', function(e) {
+            stocktable.draw();
+            e.preventDefault();
+        });
+
+         $('#stockCsv').click(function(e) {
+            $('#download-to').val($('#to').val());
+            $('#download-from').val($('#from').val());
+            $('#download-name').val($('#name').val());
+            $('#download-csv').submit();
+        });
     });
 </script>
 @endsection

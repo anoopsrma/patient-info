@@ -7,6 +7,7 @@ use DataTables;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class StockController extends Controller
 {
@@ -31,24 +32,26 @@ class StockController extends Controller
     }
 
     /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
+     * Retrieve Data for DataTable.
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @param boolean $download
+     * @return \Illuminate\Http\Response
      */
     public function getStockDataTable(Request $request, $download=false)
     {
         $stocks = Stock::select('*');
-        if ($request->has('name')) {
+        if ($request->name) {
             $stocks = $stocks->where('name', 'LIKE', '%'.$request->name.'%');
         }
-        if ($request->has('from')) {
-            $stocks = $stocks->whereDate('created_at', '>=', Carbon::parse($request->from.' 00:00:00'));
+        if ($request->from) {
+            $stocks = $stocks->where('created_at', '>=', Carbon::parse($request->from.' 00:00:00'));
         }
-        if ($request->has('to')) {
+        if ($request->to) {
             $stocks = $stocks->where('created_at', '<=', Carbon::parse($request->to.' 23:59:59'));
         }
         if($download) {
-            return $stocks->get();
+            return $stocks;
         }
 
         return Datatables::of($stocks)
@@ -59,6 +62,43 @@ class StockController extends Controller
                 return Carbon::parse($stock->created_at)->toFormattedDateString();
             })
             ->make(true);
+    }
+
+    /**
+     * Retrieve Data for DataTable.
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @param boolean $download
+     * @return \Illuminate\Http\Response
+     */
+    public function getStockCsv(Request $request)
+    {
+        $headers = array(
+            'Content-Type'        => 'text/csv',
+            'Cache-Control'       => 'no-cache ',
+            'Content-Disposition' => 'attachment; filename=esewa_report'.Carbon::now()->toDateString().'.csv',
+            'Expires'             => '0',
+            'Pragma'              => 'public',
+        );
+        $stocks = $this->getStockDataTable($request, $download=true);
+
+        return $response = new StreamedResponse(function () use ($stocks) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, [
+                "S.N", "Name", "Type", "Price", "Added By", "Created_At"
+            ]);
+            foreach($stocks->cursor() as $key => $stock) {
+                fputcsv($handle, [
+                    ++$key,
+                    $stock->name,
+                    $stock->type,
+                    $stock->price,
+                    $stock->admin,
+                    $stock->created_at,
+                ]);
+            }
+            fclose($handle);
+        }, 200, $headers);
     }
 
     /**
