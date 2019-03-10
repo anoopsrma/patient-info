@@ -101,7 +101,7 @@
             e.preventDefault();
         });
 
-         $('#stockCsv').click(function(e) {
+        $('#stockCsv').click(function(e) {
             $('#download-to').val($('#to').val());
             $('#download-from').val($('#from').val());
             $('#download-name').val($('#name').val());

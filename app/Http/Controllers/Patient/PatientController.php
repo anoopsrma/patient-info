@@ -10,6 +10,7 @@ use DataTables;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PatientController extends Controller
 {
@@ -43,11 +44,6 @@ class PatientController extends Controller
     public function getPatientDataTable(Request $request, $download=false)
     {
         $patients = Patient::select('*');
-        if ($request->name) {
-            $patients = $patients->where('first_name', 'LIKE', '%'.$request->name.'%')
-                            ->orWhere('last_name', 'LIKE', '%'.$request->name.'%')
-                            ->orWhere('middle_name', 'LIKE', '%'.$request->name.'%');
-        }
         if ($request->from) {
             $patients = $patients->where('created_at', '>=', Carbon::parse($request->from.' 00:00:00'));
         }
@@ -91,8 +87,8 @@ class PatientController extends Controller
                         'method' => 'Delete',
                         'class' => 'pull-right'
                     ]) .
-                    "<a href='#' onclick=\"if(!confirm('Are you sure you want to delete ?')) return false;\"><i class='fa fa-times-circle fa-lg mt-4'></i>
-                        </a> " .
+                    "<button href='#' class='btn btn-sm btn-danger' onclick=\"if(!confirm('Are you sure you want to delete ?')) return false;\">Delete</i>
+                        </button> " .
                     Form::close();
             })
             ->rawColumns(['name', 'action'])
@@ -141,6 +137,7 @@ class PatientController extends Controller
                 'type'          => $value,
                 'name'          => $data['medicine'][$key],
                 'price'         => $data['price'][$key],
+                'created_at'    => Carbon::now()
             ]);
         }
     }
@@ -165,7 +162,8 @@ class PatientController extends Controller
      */
     public function edit(Patient $patient)
     {
-        //
+        $medicines = DB::table('patient_medicines')->where('patient_id',$patient->id)->get();
+        return view('patient.edit',['patient' => $patient , 'medicines' => $medicines]);
     }
 
     /**
@@ -177,7 +175,34 @@ class PatientController extends Controller
      */
     public function update(Request $request, Patient $patient)
     {
-        //
+        try {
+            $data = $request->only($this->getData()) + ['admin' => Auth::user()->email];
+            $patient->update($data);
+            $this->updateMedicine($patient->id, $request->only(['type','medicine','price']));
+            return redirect('patients')->with('status', ' Patient Updated Successfully');
+        } catch (Exception $e) {
+            return redirect('patients/create')->with('error', 'Something Went Wrong!');
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  string  $id
+     * @return array $data
+     */
+    public function updateMedicine($id, $data)
+    {
+        DB::table('patient_medicines')->where('patient_id',$id)->delete();
+        foreach ($data['type'] as $key => $value) {
+            DB::table('patient_medicines')->insert([
+                'patient_id'    => $id,
+                'type'          => $value,
+                'name'          => $data['medicine'][$key],
+                'price'         => $data['price'][$key],
+                'created_at'    => Carbon::now()
+            ]);
+        }
     }
 
     /**
@@ -188,7 +213,50 @@ class PatientController extends Controller
      */
     public function destroy(Patient $patient)
     {
-        //
+        try {
+            $patient->delete();
+            return redirect('patients')->with('status', ' Patient Deleted Successfully');
+        } catch (Exception $e) {
+            return redirect('patients/create')->with('error', 'Something Went Wrong!');
+        }
+        
+    }
+
+    /**
+     * Retrieve Data for DataTable.
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @param boolean $download
+     * @return \Illuminate\Http\Response
+     */
+    public function getPatientCsv(Request $request)
+    {
+        $headers = array(
+            'Content-Type'        => 'text/csv',
+            'Cache-Control'       => 'no-cache ',
+            'Content-Disposition' => 'attachment; filename=patient'.Carbon::now()->toDateString().'.csv',
+            'Expires'             => '0',
+            'Pragma'              => 'public',
+        );
+        $patients = $this->getPatientDataTable($request, $download=true);
+
+        return $response = new StreamedResponse(function () use ($patients) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, [
+                "S.N", "Name", "Gender", "Age", "Group", "Created_At"
+            ]);
+            foreach($patients->cursor() as $key => $patient) {
+                fputcsv($handle, [
+                    ++$key,
+                    $patient->first_name.' '.$patient->middle_name.' '.$patient->last_name,
+                    $patient->gender,
+                    $patient->age,
+                    $patient->group,
+                    $patient->created_at,
+                ]);
+            }
+            fclose($handle);
+        }, 200, $headers);
     }
 
     /**
@@ -211,6 +279,7 @@ class PatientController extends Controller
             "middle_name",
             "is_referred",
             "social_indicator",
+            "ward",
         ];
     }
 }

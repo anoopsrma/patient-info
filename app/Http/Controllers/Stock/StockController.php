@@ -76,7 +76,7 @@ class StockController extends Controller
         $headers = array(
             'Content-Type'        => 'text/csv',
             'Cache-Control'       => 'no-cache ',
-            'Content-Disposition' => 'attachment; filename=esewa_report'.Carbon::now()->toDateString().'.csv',
+            'Content-Disposition' => 'attachment; filename=stock'.Carbon::now()->toDateString().'.csv',
             'Expires'             => '0',
             'Pragma'              => 'public',
         );

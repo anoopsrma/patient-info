@@ -59,7 +59,6 @@
                     data: function (d) {
                         d.from = $('#from').val();
                         d.to = $('#to').val();
-                        d.name = $('#name').val();
                     }
                 },
             order: [[0, 'asc']],
@@ -84,10 +83,9 @@
             e.preventDefault();
         });
 
-         $('#stockCsv').click(function(e) {
+         $('#patientCsv').click(function(e) {
             $('#download-to').val($('#to').val());
             $('#download-from').val($('#from').val());
-            $('#download-name').val($('#name').val());
             $('#download-csv').submit();
         });
 

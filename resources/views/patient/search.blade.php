@@ -11,11 +11,11 @@
     <div class="form-group col-sm-2">
         <button class="btn btn-sm btn-danger" id="search-form" style="margin-top: 35px;">
         </i>Search</button>
-        <button class="btn btn-sm btn-primary" id= "stockCsv" style="margin-top: 35px;"></i>CSV</button>
+        <button class="btn btn-sm btn-primary" id= "patientCsv" style="margin-top: 35px;"></i>CSV</button>
     </div>
 </div>
 {{ Form::open([
-    'url'   => route("stock.csv"),
+    'url'   => route("patient.csv"),
     'method' => 'post',
     'id'    => 'download-csv',
     'target' => '_blank',

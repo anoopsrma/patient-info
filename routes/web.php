@@ -19,9 +19,9 @@ Auth::routes();
 
 // Patients
 Route::resource('/patients', 'Patient\PatientController');
-Route::get('/patient/datatable', 'Patient\PatientController@getPatientDataTable')->name('patient.datatable');
-Route::any('/patient/csv', 'Stock\StockController@getStockCsv')->name('patient.csv');
-
+Route::get('/patient/datatable', 'Patient\PatientController@getPatientDataTable')
+    ->name('patient.datatable');
+Route::any('/patient/csv', 'Patient\PatientController@getPatientCsv')->name('patient.csv');
 // Stocks
 Route::resource('/stocks', 'Stock\StockController');
 Route::get('/stock/datatable', 'Stock\StockController@getStockDataTable')->name('stock.datatable');
