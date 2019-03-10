@@ -17,7 +17,12 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/patients', 'HomeController@index')->name('home');
+// Patients
+Route::resource('/patients', 'Patient\PatientController');
+Route::get('/patient/datatable', 'Patient\PatientController@getPatientDataTable')->name('patient.datatable');
+Route::any('/patient/csv', 'Stock\StockController@getStockCsv')->name('patient.csv');
+
+// Stocks
 Route::resource('/stocks', 'Stock\StockController');
 Route::get('/stock/datatable', 'Stock\StockController@getStockDataTable')->name('stock.datatable');
 Route::any('/stock/csv', 'Stock\StockController@getStockCsv')->name('stock.csv');

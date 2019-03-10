@@ -13,8 +13,9 @@ class DatabaseSeeder extends Seeder
     {
         // $this->call(UsersTableSeeder::class);
         // $user = factory(App\User::class)->create();
-        for ($i=0; $i < 10; $i++) { 
-            $stock = factory(App\Stock::class)->create();
+        for ($i=0; $i < 10; $i++) {
+            // $stock = factory(App\Stock::class)->create();
+            $patient = factory(App\Patient::class)->create();
         }
     }
 }
