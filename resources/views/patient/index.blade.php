@@ -15,41 +15,12 @@
             <div class="card">
                 <div class="card-body">
                     @if (session('status'))
-    <div class="alert alert-success">
-        {{ session('status') }}
-    </div>
-@endif
-                <div class="row">
-                    <div class="form-group col-sm-3">
-                        <label for="from"><strong>From</strong></label>
-                        <input class="form-control" id="from" type="date" value="{{Carbon\Carbon::now()->startOfMonth()->toDateString()}}">
-                    </div>
-                    <div class="form-group col-sm-3">
-                        <label for="to">To</label>
-                        <input class="form-control" id="to" type="date">
-                    </div>
-                    <div class="form-group col-sm-3">
-                        <label for="name"><strong>Medicine</strong></label>
-                        <input class="form-control" id="name" type="text">
-                    </div>
-                    <div class="form-group col-sm-2">
-                        <button class="btn btn-sm btn-danger" id="search-form" style="margin-top: 35px;">
-                        </i>Search</button>
-                        <button class="btn btn-sm btn-primary" id= "stockCsv" style="margin-top: 35px;"></i>CSV</button>
-                    </div>
-                </div>
-                {{ Form::open([
-    'url'   => route("stock.csv"),
-    'method' => 'post',
-    'id'    => 'download-csv',
-    'target' => '_blank',
-    ])
-}}
-    {{ Form::hidden('from', null, ['id' => 'download-from']) }}
-    {{ Form::hidden('to', null, ['id' => 'download-to']) }}
-    {{ Form::hidden('username', null, ['id' => 'download-username']) }}
-
-{{ Form::close() }}
+                        <div class="alert alert-success">
+                            {{ session('status') }}
+                        </div>
+                    @endif
+                @include('patient.search')
+                @include('patient.modal')
                 <table class="table table-responsive-sm table-striped" id="stocks-table">
                     <thead>
                         <tr>
@@ -65,6 +36,7 @@
                             <th>परिचय पत्र</th>
                             <th>लछित समुह</th>
                             <th>आएको मिती</th>
+                            <th>कार्य</th>
                         </tr>
                     </thead>
                 </table>
@@ -79,7 +51,7 @@
 @section('script')
 <script>
     $(function() {
-        var stocktable = $('.table').DataTable({
+        var stocktable = $('#stocks-table').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
@@ -103,7 +75,8 @@
                 {data:'is_referred', name:'is_referred', width:'5%'},
                 {data:'has_id', name:'has_id', width:'5%'},
                 {data:'group', name:'group', width:'5%'},
-                {data:'created_at', name:'created_at', width:'10%'}
+                {data:'created_at', name:'created_at', width:'10%'},
+                {data:'action', name:'action', width:'5%'}
             ]
         })
         $('#search-form').on('click', function(e) {
@@ -116,6 +89,22 @@
             $('#download-from').val($('#from').val());
             $('#download-name').val($('#name').val());
             $('#download-csv').submit();
+        });
+
+        $("body").on('click', '#detail', function(e) {
+            e.preventDefault();
+            var id = $(this).attr('data-id');
+            $.ajax({
+                url: '{{url('/')}}'+'/patients/'+id,
+                type: 'get',
+                success: function(data) {
+                    $('.modal-body').html(data);
+                },
+                error: function(data) {
+                    $('.modal-body').html('Cannot Access Server');
+                    console.log('failure', data);
+                }
+            });
         });
     });
 </script>

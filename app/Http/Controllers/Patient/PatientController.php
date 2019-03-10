@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Patient;
 
 use DB;
 use Auth;
+use Form;
 use App\Patient;
 use DataTables;
 use Carbon\Carbon;
@@ -60,9 +61,8 @@ class PatientController extends Controller
         return Datatables::of($patients)
             ->editColumn('name', function ($patient) {
                 return ($patient->first_name.' '.$patient->middle_name.' '.$patient->last_name.'
-                    <br><br><button class="btn btn-sm btn-primary" data-id='.$patient->id.'>View Detail</button>');
+                    <br><br><button class="btn btn-sm btn-primary" id="detail" data-toggle="modal" data-target="#myModal" data-id='.$patient->id.'>औषधी/सेवा</button>');
             })
-            ->rawColumns(['name'])
             ->filterColumn('name', function($query, $keyword) {
                 $query->where(function($query) use ($keyword) {
                     $query->whereRaw("CONCAT(first_name,' ',middle_name,' ',last_name) like ?", ["%{$keyword}%"]);
@@ -80,6 +80,22 @@ class PatientController extends Controller
             ->editcolumn('created_at', function ($patient) {
                 return Carbon::parse($patient->created_at)->toFormattedDateString();
             })
+            ->editcolumn('action', function ($patient) {
+                $actionHtml =
+                    "<a href=" . route('patients.edit', $patient->id) . " class='pull-left'>
+                        <i class='fa fa-edit fa-lg mt-4'></i>
+                    </a>";
+                return $actionHtml .=
+                    Form::open([
+                        'url' => route('patients.destroy', $patient->id),
+                        'method' => 'Delete',
+                        'class' => 'pull-right'
+                    ]) .
+                    "<a href='#' onclick=\"if(!confirm('Are you sure you want to delete ?')) return false;\"><i class='fa fa-times-circle fa-lg mt-4'></i>
+                        </a> " .
+                    Form::close();
+            })
+            ->rawColumns(['name', 'action'])
             ->make(true);
     }
 
@@ -137,7 +153,8 @@ class PatientController extends Controller
      */
     public function show(Patient $patient)
     {
-        //
+        $data = DB::table('patient_medicines')->where('patient_id',$patient->id)->get();
+        return view('patient.table',['data' => $data]);
     }
 
     /**
